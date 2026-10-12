@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日完成情况通报 · 分享版（2026年10月8日）</title>
+<style>
+:root{
+  --ink:#14213d;
+  --ink-soft:#3a4666;
+  --paper:#f6f7fb;
+  --card:#ffffff;
+  --line:#e3e6f0;
+  --gold:#c58f2a;
+  --gold-soft:#f3e3c3;
+  --red:#d93a3a;
+  --red-bg:#fdecec;
+  --ok:#1f8a5c;
+  --ok-bg:#e7f5ee;
+  --blue:#2b5fd9;
+  --mono:"Consolas","Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+  font-size:14px;
+}
+/* ─────────── 页头 ─────────── */
+.topbar{
+  background:linear-gradient(135deg,#14213d 0%,#1d2f56 100%);
+  color:#fff;
+  padding:22px clamp(16px,4vw,48px) 18px;
+}
+.topbar .row1{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:clamp(20px,2.6vw,28px);font-weight:800;letter-spacing:2px}
+.topbar h1 .cross{color:var(--gold);margin-right:8px}
+.topbar .ver{font-size:12px;opacity:.75;font-family:var(--mono)}
+.topbar .row2{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,.18)}
+.date-tag{font-size:15px;font-weight:700;color:var(--gold-soft)}
+.legend{font-size:12px;opacity:.92;display:flex;gap:18px;flex-wrap:wrap}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend .dot.red{background:var(--red)}
+.legend .dot.ok{background:var(--ok)}
+.legend .dot.g80{background:var(--gold);opacity:.85}
+/* ─────────── 数据导入区 ─────────── */
+.import-panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px clamp(14px,3vw,28px);
+  margin:18px clamp(10px,2.5vw,32px);
+  box-shadow:0 2px 10px rgba(20,33,61,.05);
+}
+.import-panel h2{font-size:15px;margin-bottom:4px}
+.import-panel .hint{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
+.import-flex{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.file-slot{
+  flex:1;min-width:230px;
+  border:2px dashed #b8c0d8;
+  border-radius:10px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.file-slot:hover{border-color:var(--blue);background:#f5f8ff}
+.file-slot.loaded{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.file-slot .ico{font-size:26px;width:34px;text-align:center;flex:none}
+.file-slot .txt{min-width:0}
+.file-slot .txt b{display:block;font-size:13px}
+.file-slot .txt span{display:block;font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-slot input{display:none}
+.import-status{font-size:12px;color:var(--ink-soft);margin-top:10px}
+.import-status b{color:var(--ink)}
+.import-status .err{color:var(--red)}
+/* ─────────── 汇总卡片 ─────────── */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;
+  margin:0 clamp(10px,2.5vw,32px) 18px;
+}
+.stat{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px;
+  box-shadow:0 2px 8px rgba(20,33,61,.04);
+}
+.stat .lab{font-size:12px;color:var(--ink-soft)}
+.stat .val{font-size:26px;font-weight:800;font-family:var(--mono);margin-top:2px}
+.stat .val small{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.stat .val.red{color:var(--red)}
+.stat .val.ok{color:var(--ok)}
+.stat .val.gold{color:var(--gold)}
+/* ─────────── 小组表格 ─────────── */
+.groups{margin:0 clamp(10px,2.5vw,32px) 26px;display:grid;gap:20px}
+.grp-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(20,33,61,.05)}
+.grp-head{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:13px 18px;
+  background:linear-gradient(90deg,rgba(20,33,61,.06),rgba(20,33,61,.01));
+  border-bottom:1px solid var(--line);
+}
+.grp-badge{
+  font-size:17px;font-weight:800;color:#fff;
+  background:var(--ink);
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex:none;
+}
+.grp-badge.gp{background:var(--gold)}
+.grp-title{font-size:15px;font-weight:700}
+.grp-sub{font-size:12px;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap;margin-top:1px}
+.grp-sub b{font-family:var(--mono)}
+.grp-sub .rt{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{
+  background:#eef0f7;
+  color:var(--ink-soft);
+  font-size:12px;
+  font-weight:700;
+  padding:8px 10px;
+  text-align:left;
+  white-space:nowrap;
+  border-bottom:1px solid var(--line);
+}
+thead th.num,td.num{text-align:right}
+thead th.ctr,td.ctr{text-align:center}
+tbody td{padding:9px 10px;border-bottom:1px solid #eef0f5}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f8faff}
+td.rank{font-family:var(--mono);font-weight:700;color:var(--ink-soft);width:46px}
+td.name{font-weight:700}
+td.name small{display:block;font-weight:400;font-size:11px;color:var(--ink-soft)}
+td.num{font-family:var(--mono);font-weight:600;white-space:nowrap}
+td.num small{font-weight:400;font-size:10.5px;color:var(--ink-soft)}
+td.target{color:var(--ink-soft)}
+/* 完成占比列 */
+td.pctv{font-weight:700;color:var(--ink)}
+td .bar{
+  height:8px;border-radius:3px;background:#eceef5;
+  position:relative;min-width:80px;width:100%;
+  overflow:hidden;margin-top:4px;
+}
+td .bar i{
+  display:block;height:100%;
+  border-radius:3px;
+  background:linear-gradient(90deg,#3b6fd9,#5d8ae8);
+}
+td .bar i.over{
+  background:linear-gradient(90deg,var(--gold),#e0b05a);
+}
+td .pct{font-size:11px;color:var(--ink-soft);white-space:nowrap;margin-top:2px;display:block}
+td.ratio b{font-family:var(--mono);font-size:14.5px}
+td.ratio .sub{font-size:10.5px;color:var(--ink-soft);display:block;font-weight:400}
+/* 129+ 占比标红 */
+.mark-red{color:var(--red)!important}
+td.ratio.mark-red{background:var(--red-bg)}
+/* 达标绿 */
+.mark-ok{color:var(--ok)}
+/* 差额 */
+td.gap{font-weight:700}
+td.gap.done{color:var(--ok)}
+td.gap.todo{color:var(--ink)}
+/* 80% 线 */
+.p80{
+  background:linear-gradient(90deg,var(--gold-soft),#fff);
+}
+tr.over80 td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+/* ─────────── 视图切换选项卡 ─────────── */
+.tabs{
+  display:flex;gap:10px;margin:18px clamp(10px,2.5vw,32px) 0;flex-wrap:wrap;
+}
+.tab{
+  border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:10px 10px 0 0;padding:10px 22px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:inherit;
+  border-bottom:3px solid transparent;
+}
+.tab:hover{border-color:var(--blue);color:var(--blue)}
+.tab.on{
+  background:var(--ink);color:#fff;border-color:var(--ink);
+}
+/* ─────────── 门店维度 ─────────── */
+.shops-wrap{margin:0 clamp(10px,2.5vw,32px) 26px;display:grid;gap:20px}
+.sec-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(20,33,61,.05)}
+.sec-head{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:13px 18px;
+  background:linear-gradient(90deg,rgba(20,33,61,.06),rgba(20,33,61,.01));
+  border-bottom:1px solid var(--line);
+}
+.sec-badge{
+  font-size:13px;font-weight:800;color:#fff;
+  background:var(--ink);
+  padding:6px 12px;border-radius:8px;
+  flex:none;white-space:nowrap;
+}
+.sec-badge.red-team{background:#b03030}
+.sec-badge.blue-team{background:#2b5fd9}
+.sec-badge.tot{background:var(--gold)}
+.sec-badge.merch{background:#7a4fbf}
+.sec-title{font-size:15px;font-weight:700}
+.sec-sub{font-size:12px;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap;margin-top:1px}
+.sec-sub b{font-family:var(--mono)}
+.sec-sub .rt{color:var(--red)}
+/* 门店行 */
+td.shopname{font-weight:700;min-width:130px}
+td.shopname small{display:block;font-weight:400;font-size:10.5px;color:#8a90a8;margin-top:1px}
+tr.zero td{color:#a9afc0}
+tr.zero td.shopname,tr.zero td.ctr{color:#a9afc0}
+td.ppl{font-size:12px;color:var(--ink-soft);max-width:200px}
+td.nodata{color:#c3c8d8;font-size:12px}
+/* 商维度区块标题 */
+.merch-title{
+  font-size:19px;font-weight:800;letter-spacing:1px;color:var(--ink);
+  margin:6px clamp(10px,2.5vw,32px) -6px;
+}
+.merch-title::before{
+  content:"";display:inline-block;width:6px;height:18px;border-radius:3px;
+  background:linear-gradient(180deg,#7a4fbf,#a37adb);margin-right:10px;vertical-align:-2px;
+}
+/* 隐藏门店提示 */
+.sec-sub .hid{color:#9aa0b5}
+.sec-sub .hid b{font-family:var(--mono)}
+/* 页脚 ─────────── */
+.foot{
+  text-align:center;
+  color:#8a90a8;
+  font-size:12px;
+  padding:8px 16px 26px;
+}
+.foot button{
+  border:1px solid #c8cddd;background:#fff;color:var(--ink-soft);
+  border-radius:8px;padding:7px 16px;font-size:12.5px;cursor:pointer;
+  margin:0 4px 8px;transition:all .15s;
+  font-family:inherit;
+}
+.foot button:hover{border-color:var(--blue);color:var(--blue)}
+@media print{
+  .import-panel,.foot .noprint{display:none!important}
+  body{background:#fff}
+  .topbar{border-radius:0}
+  .grp-card,.stat{box-shadow:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="row1">
+    <h1><span class="cross">✚</span>每日完成情况通报<span class="ver" id="verTag">分享版 · 只读</span></h1>
+  </div>
+  <div class="row2">
+    <span class="date-tag" id="dateTag">数据截至 2026年10月8日（2026年10月目标）</span>
+    <div class="legend">
+      <span><span class="dot red"></span>129+占比未达标</span>
+      <span><span class="dot ok"></span>129+占比达标</span>
+      <span><span class="dot g80"></span>金色竖线 = 目标80%位置</span>
+      <span><span class="dot g80" style="background:var(--gold-soft)"></span>淡金底色行 = 已越过80%线</span>
+    </div>
+  </div>
+</div>
+<div>
+  <button class="tab on" id="tabPeople" onclick="sView('people')">人员维度</button>
+  <button class="tab" id="tabShop" onclick="sView('shop')">门店维度</button>
+  <button class="tab" id="tabMerch" onclick="sView('merch')">商维度</button>
+</div>
+<div class="summary" id="summary" style="display: grid;">
+  <div class="stat"><div class="lab">通报人员</div><div class="val" id="sN">44</div></div>
+  <div class="stat"><div class="lab">合计完成（单）</div><div class="val" id="sTot">289</div></div>
+  <div class="stat"><div class="lab">合计目标（单）</div><div class="val" id="sTgt">1274</div></div>
+  <div class="stat"><div class="lab">129+ 合计</div><div class="val gold" id="sHi">84 <small>单</small></div></div>
+  <div class="stat"><div class="lab">129+ 占比达标</div><div class="val gold" id="sOk">25 <small>/ 44 人</small></div></div>
+  <div class="stat"><div class="lab">越80%线人数</div><div class="val gold" id="s80">0 <small>人</small></div></div>
+</div>
+<div class="summary" id="summaryShop" style="display: grid;">
+  <div class="stat"><div class="lab">展示门店</div><div class="val" id="sSN">35</div></div>
+  <div class="stat"><div class="lab">展示有单门店</div><div class="val ok" id="sSA">26 <small>/ 35 家</small></div></div>
+  <div class="stat"><div class="lab">门店合计完成（含隐藏）</div><div class="val" id="sSTot">278</div></div>
+  <div class="stat"><div class="lab">129+ 合计</div><div class="val gold" id="sSHi">76 <small>单</small></div></div>
+  <div class="stat"><div class="lab">红军完成（含隐藏）</div><div class="val" id="sSRed" style="color:#b03030">147 <small>单</small></div></div>
+  <div class="stat"><div class="lab">蓝军完成（含隐藏）</div><div class="val" id="sSBlue" style="color:#2b5fd9">131 <small>单</small></div></div>
+</div>
+<div class="summary" id="summaryMerch" style="display: grid;">
+  <div class="stat"><div class="lab">合作商（块）</div><div class="val" id="sMB">8</div></div>
+  <div class="stat"><div class="lab">展示门店</div><div class="val" id="sMN">43</div></div>
+  <div class="stat"><div class="lab">展示有单门店</div><div class="val ok" id="sMA">21 <small>/ 43 家</small></div></div>
+  <div class="stat"><div class="lab">合作商合计完成（含隐藏）</div><div class="val" id="sMTot">278</div></div>
+  <div class="stat"><div class="lab">129+ 合计</div><div class="val gold" id="sMHi">76 <small>单</small></div></div>
+</div>
+<div class="groups" id="groups" style="display: grid;"><div class="grp-card"><div class="grp-head"><div class="grp-badge gp">A+</div><div><div class="grp-title">A+ 组 · 129+ 需达 22%</div><div class="grp-sub"><span>完成合计 <b>103</b> 单</span><span>129+ <b>37</b> 单</span><span>组内占比 <b>35.9%</b></span><span class="rt">3 人未达标</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>小组</th><th>人名</th><th class="num">目标</th><th class="num">完成情况</th><th class="num">完成占比</th><th>129+ 占比</th><th class="num">距 80% 差额</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">A+</td><td class="name">陈鸿香</td><td class="num target">31</td><td class="num">16<small>（129+：5）</small><div class="bar"><i class="" style="width:65%"></i></div></td><td class="num pctv">51.6%</td><td class="ratio mark-ok" style="text-align:center"><b>31.3%</b><span class="sub">5 / 16 · 需22%</span></td><td class="num gap todo">-9</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">A+</td><td class="name">郑浩康</td><td class="num target">44</td><td class="num">19<small>（129+：7）</small><div class="bar"><i class="" style="width:54%"></i></div></td><td class="num pctv">43.2%</td><td class="ratio mark-ok" style="text-align:center"><b>36.8%</b><span class="sub">7 / 19 · 需22%</span></td><td class="num gap todo">-16</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">A+</td><td class="name">李晓燕</td><td class="num target">37</td><td class="num">12<small>（129+：5）</small><div class="bar"><i class="" style="width:41%"></i></div></td><td class="num pctv">32.4%</td><td class="ratio mark-ok" style="text-align:center"><b>41.7%</b><span class="sub">5 / 12 · 需22%</span></td><td class="num gap todo">-18</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">A+</td><td class="name">刘礼辉</td><td class="num target">60</td><td class="num">19<small>（129+：10）</small><div class="bar"><i class="" style="width:40%"></i></div></td><td class="num pctv">31.7%</td><td class="ratio mark-ok" style="text-align:center"><b>52.6%</b><span class="sub">10 / 19 · 需22%</span></td><td class="num gap todo">-29</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">A+</td><td class="name">王静纯</td><td class="num target">32</td><td class="num">10<small>（129+：5）</small><div class="bar"><i class="" style="width:39%"></i></div></td><td class="num pctv">31.3%</td><td class="ratio mark-ok" style="text-align:center"><b>50.0%</b><span class="sub">5 / 10 · 需22%</span></td><td class="num gap todo">-16</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">A+</td><td class="name">刘霞</td><td class="num target">45</td><td class="num">10<small>（129+：3）</small><div class="bar"><i class="" style="width:28%"></i></div></td><td class="num pctv">22.2%</td><td class="ratio mark-ok" style="text-align:center"><b>30.0%</b><span class="sub">3 / 10 · 需22%</span></td><td class="num gap todo">-26</td></tr><tr class=""><td class="rank ctr">7</td><td class="ctr">A+</td><td class="name">周闰平</td><td class="num target">41</td><td class="num">7<small>（129+：2）</small><div class="bar"><i class="" style="width:21%"></i></div></td><td class="num pctv">17.1%</td><td class="ratio mark-ok" style="text-align:center"><b>28.6%</b><span class="sub">2 / 7 · 需22%</span></td><td class="num gap todo">-26</td></tr><tr class=""><td class="rank ctr">8</td><td class="ctr">A+</td><td class="name">郑君楠</td><td class="num target">41</td><td class="num">6<small>（129+：0）</small><div class="bar"><i class="" style="width:18%"></i></div></td><td class="num pctv">14.6%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 6 · 需22%</span></td><td class="num gap todo">-27</td></tr><tr class=""><td class="rank ctr">9</td><td class="ctr">A+</td><td class="name">秦智文</td><td class="num target">41</td><td class="num">4<small>（129+：0）</small><div class="bar"><i class="" style="width:12%"></i></div></td><td class="num pctv">9.8%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 4 · 需22%</span></td><td class="num gap todo">-29</td></tr><tr class=""><td class="rank ctr">10</td><td class="ctr">A+</td><td class="name">杨丹青</td><td class="num target">14</td><td class="num">0<small>（129+：0）</small><div class="bar"><i class="" style="width:0%"></i></div></td><td class="num pctv">0.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 0 · 需22%</span></td><td class="num gap todo">-11</td></tr></tbody></table></div><div class="grp-card"><div class="grp-head"><div class="grp-badge">A</div><div><div class="grp-title">A 组 · 129+ 需达 22%</div><div class="grp-sub"><span>完成合计 <b>49</b> 单</span><span>129+ <b>17</b> 单</span><span>组内占比 <b>34.7%</b></span><span class="rt">1 人未达标</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>小组</th><th>人名</th><th class="num">目标</th><th class="num">完成情况</th><th class="num">完成占比</th><th>129+ 占比</th><th class="num">距 80% 差额</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">A</td><td class="name">孙伟明</td><td class="num target">39</td><td class="num">15<small>（129+：4）</small><div class="bar"><i class="" style="width:48%"></i></div></td><td class="num pctv">38.5%</td><td class="ratio mark-ok" style="text-align:center"><b>26.7%</b><span class="sub">4 / 15 · 需22%</span></td><td class="num gap todo">-16</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">A</td><td class="name">李伯乐</td><td class="num target">39</td><td class="num">13<small>（129+：7）</small><div class="bar"><i class="" style="width:42%"></i></div></td><td class="num pctv">33.3%</td><td class="ratio mark-ok" style="text-align:center"><b>53.8%</b><span class="sub">7 / 13 · 需22%</span></td><td class="num gap todo">-18</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">A</td><td class="name">吴达彬</td><td class="num target">33</td><td class="num">9<small>（129+：2）</small><div class="bar"><i class="" style="width:34%"></i></div></td><td class="num pctv">27.3%</td><td class="ratio mark-ok" style="text-align:center"><b>22.2%</b><span class="sub">2 / 9 · 需22%</span></td><td class="num gap todo">-17</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">A</td><td class="name">温锦标</td><td class="num target">27</td><td class="num">4<small>（129+：1）</small><div class="bar"><i class="" style="width:19%"></i></div></td><td class="num pctv">14.8%</td><td class="ratio mark-ok" style="text-align:center"><b>25.0%</b><span class="sub">1 / 4 · 需22%</span></td><td class="num gap todo">-18</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">A</td><td class="name">谢燕华</td><td class="num target">39</td><td class="num">5<small>（129+：1）</small><div class="bar"><i class="" style="width:16%"></i></div></td><td class="num pctv">12.8%</td><td class="ratio mark-red" style="text-align:center"><b>20.0%</b><span class="sub">1 / 5 · 需22%</span></td><td class="num gap todo">-26</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">A</td><td class="name">张坤明</td><td class="num target">33</td><td class="num">3<small>（129+：2）</small><div class="bar"><i class="" style="width:11%"></i></div></td><td class="num pctv">9.1%</td><td class="ratio mark-ok" style="text-align:center"><b>66.7%</b><span class="sub">2 / 3 · 需22%</span></td><td class="num gap todo">-23</td></tr></tbody></table></div><div class="grp-card"><div class="grp-head"><div class="grp-badge">B</div><div><div class="grp-title">B 组 · 129+ 需达 20%</div><div class="grp-sub"><span>完成合计 <b>56</b> 单</span><span>129+ <b>6</b> 单</span><span>组内占比 <b>10.7%</b></span><span class="rt">5 人未达标</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>小组</th><th>人名</th><th class="num">目标</th><th class="num">完成情况</th><th class="num">完成占比</th><th>129+ 占比</th><th class="num">距 80% 差额</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">B</td><td class="name">欧阳丹婷</td><td class="num target">31</td><td class="num">13<small>（129+：3）</small><div class="bar"><i class="" style="width:52%"></i></div></td><td class="num pctv">41.9%</td><td class="ratio mark-ok" style="text-align:center"><b>23.1%</b><span class="sub">3 / 13 · 需20%</span></td><td class="num gap todo">-12</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">B</td><td class="name">易凤玲</td><td class="num target">35</td><td class="num">10<small>（129+：1）</small><div class="bar"><i class="" style="width:36%"></i></div></td><td class="num pctv">28.6%</td><td class="ratio mark-red" style="text-align:center"><b>10.0%</b><span class="sub">1 / 10 · 需20%</span></td><td class="num gap todo">-18</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">B</td><td class="name">罗志伟</td><td class="num target">33</td><td class="num">9<small>（129+：0）</small><div class="bar"><i class="" style="width:34%"></i></div></td><td class="num pctv">27.3%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 9 · 需20%</span></td><td class="num gap todo">-17</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">B</td><td class="name">陈媛</td><td class="num target">37</td><td class="num">10<small>（129+：0）</small><div class="bar"><i class="" style="width:34%"></i></div></td><td class="num pctv">27.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 10 · 需20%</span></td><td class="num gap todo">-20</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">B</td><td class="name">张细妹</td><td class="num target">27</td><td class="num">6<small>（129+：1）</small><div class="bar"><i class="" style="width:28%"></i></div></td><td class="num pctv">22.2%</td><td class="ratio mark-red" style="text-align:center"><b>16.7%</b><span class="sub">1 / 6 · 需20%</span></td><td class="num gap todo">-16</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">B</td><td class="name">陈伊伊</td><td class="num target">31</td><td class="num">5<small>（129+：0）</small><div class="bar"><i class="" style="width:20%"></i></div></td><td class="num pctv">16.1%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 5 · 需20%</span></td><td class="num gap todo">-20</td></tr><tr class=""><td class="rank ctr">7</td><td class="ctr">B</td><td class="name">涂俊伟</td><td class="num target">35</td><td class="num">3<small>（129+：1）</small><div class="bar"><i class="" style="width:11%"></i></div></td><td class="num pctv">8.6%</td><td class="ratio mark-ok" style="text-align:center"><b>33.3%</b><span class="sub">1 / 3 · 需20%</span></td><td class="num gap todo">-25</td></tr></tbody></table></div><div class="grp-card"><div class="grp-head"><div class="grp-badge">C</div><div><div class="grp-title">C 组 · 129+ 需达 20%</div><div class="grp-sub"><span>完成合计 <b>69</b> 单</span><span>129+ <b>19</b> 单</span><span>组内占比 <b>27.5%</b></span><span class="rt">7 人未达标</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>小组</th><th>人名</th><th class="num">目标</th><th class="num">完成情况</th><th class="num">完成占比</th><th>129+ 占比</th><th class="num">距 80% 差额</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">C</td><td class="name">蔡清华</td><td class="num target">18</td><td class="num">10<small>（129+：4）</small><div class="bar"><i class="" style="width:69%"></i></div></td><td class="num pctv">55.6%</td><td class="ratio mark-ok" style="text-align:center"><b>40.0%</b><span class="sub">4 / 10 · 需20%</span></td><td class="num gap todo">-4</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">C</td><td class="name">朱晓丽</td><td class="num target">26</td><td class="num">8<small>（129+：4）</small><div class="bar"><i class="" style="width:38%"></i></div></td><td class="num pctv">30.8%</td><td class="ratio mark-ok" style="text-align:center"><b>50.0%</b><span class="sub">4 / 8 · 需20%</span></td><td class="num gap todo">-13</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">C</td><td class="name">孔韦林</td><td class="num target">15</td><td class="num">4<small>（129+：1）</small><div class="bar"><i class="" style="width:33%"></i></div></td><td class="num pctv">26.7%</td><td class="ratio mark-ok" style="text-align:center"><b>25.0%</b><span class="sub">1 / 4 · 需20%</span></td><td class="num gap todo">-8</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">C</td><td class="name">姚海亮</td><td class="num target">27</td><td class="num">7<small>（129+：2）</small><div class="bar"><i class="" style="width:32%"></i></div></td><td class="num pctv">25.9%</td><td class="ratio mark-ok" style="text-align:center"><b>28.6%</b><span class="sub">2 / 7 · 需20%</span></td><td class="num gap todo">-15</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">C</td><td class="name">张鹏</td><td class="num target">25</td><td class="num">6<small>（129+：2）</small><div class="bar"><i class="" style="width:30%"></i></div></td><td class="num pctv">24.0%</td><td class="ratio mark-ok" style="text-align:center"><b>33.3%</b><span class="sub">2 / 6 · 需20%</span></td><td class="num gap todo">-14</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">C</td><td class="name">郑晓南</td><td class="num target">34</td><td class="num">8<small>（129+：2）</small><div class="bar"><i class="" style="width:29%"></i></div></td><td class="num pctv">23.5%</td><td class="ratio mark-ok" style="text-align:center"><b>25.0%</b><span class="sub">2 / 8 · 需20%</span></td><td class="num gap todo">-19</td></tr><tr class=""><td class="rank ctr">7</td><td class="ctr">C</td><td class="name">张京粤</td><td class="num target">26</td><td class="num">6<small>（129+：1）</small><div class="bar"><i class="" style="width:29%"></i></div></td><td class="num pctv">23.1%</td><td class="ratio mark-red" style="text-align:center"><b>16.7%</b><span class="sub">1 / 6 · 需20%</span></td><td class="num gap todo">-15</td></tr><tr class=""><td class="rank ctr">8</td><td class="ctr">C</td><td class="name">谭雨丹</td><td class="num target">25</td><td class="num">5<small>（129+：0）</small><div class="bar"><i class="" style="width:25%"></i></div></td><td class="num pctv">20.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 5 · 需20%</span></td><td class="num gap todo">-15</td></tr><tr class=""><td class="rank ctr">9</td><td class="ctr">C</td><td class="name">李颖媚</td><td class="num target">27</td><td class="num">4<small>（129+：0）</small><div class="bar"><i class="" style="width:19%"></i></div></td><td class="num pctv">14.8%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 4 · 需20%</span></td><td class="num gap todo">-18</td></tr><tr class=""><td class="rank ctr">10</td><td class="ctr">C</td><td class="name">冯梓淇</td><td class="num target">21</td><td class="num">3<small>（129+：0）</small><div class="bar"><i class="" style="width:18%"></i></div></td><td class="num pctv">14.3%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 3 · 需20%</span></td><td class="num gap todo">-14</td></tr><tr class=""><td class="rank ctr">11</td><td class="ctr">C</td><td class="name">赵潇</td><td class="num target">14</td><td class="num">2<small>（129+：0）</small><div class="bar"><i class="" style="width:18%"></i></div></td><td class="num pctv">14.3%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 2 · 需20%</span></td><td class="num gap todo">-9</td></tr><tr class=""><td class="rank ctr">12</td><td class="ctr">C</td><td class="name">莫杰熹</td><td class="num target">17</td><td class="num">2<small>（129+：2）</small><div class="bar"><i class="" style="width:15%"></i></div></td><td class="num pctv">11.8%</td><td class="ratio mark-ok" style="text-align:center"><b>100.0%</b><span class="sub">2 / 2 · 需20%</span></td><td class="num gap todo">-12</td></tr><tr class=""><td class="rank ctr">13</td><td class="ctr">C</td><td class="name">林文娟</td><td class="num target">24</td><td class="num">2<small>（129+：1）</small><div class="bar"><i class="" style="width:10%"></i></div></td><td class="num pctv">8.3%</td><td class="ratio mark-ok" style="text-align:center"><b>50.0%</b><span class="sub">1 / 2 · 需20%</span></td><td class="num gap todo">-17</td></tr><tr class=""><td class="rank ctr">14</td><td class="ctr">C</td><td class="name">郑林胜</td><td class="num target">38</td><td class="num">2<small>（129+：0）</small><div class="bar"><i class="" style="width:7%"></i></div></td><td class="num pctv">5.3%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 2 · 需20%</span></td><td class="num gap todo">-28</td></tr><tr class=""><td class="rank ctr">15</td><td class="ctr">C</td><td class="name">邝少霞</td><td class="num target">22</td><td class="num">0<small>（129+：0）</small><div class="bar"><i class="" style="width:0%"></i></div></td><td class="num pctv">0.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 0 · 需20%</span></td><td class="num gap todo">-18</td></tr></tbody></table></div><div class="grp-card"><div class="grp-head"><div class="grp-badge">D</div><div><div class="grp-title">D 组 · 129+ 需达 20%</div><div class="grp-sub"><span>完成合计 <b>12</b> 单</span><span>129+ <b>5</b> 单</span><span>组内占比 <b>41.7%</b></span><span class="rt">3 人未达标</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>小组</th><th>人名</th><th class="num">目标</th><th class="num">完成情况</th><th class="num">完成占比</th><th>129+ 占比</th><th class="num">距 80% 差额</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">D</td><td class="name">刘昱含</td><td class="num target">15</td><td class="num">5<small>（129+：2）</small><div class="bar"><i class="" style="width:42%"></i></div></td><td class="num pctv">33.3%</td><td class="ratio mark-ok" style="text-align:center"><b>40.0%</b><span class="sub">2 / 5 · 需20%</span></td><td class="num gap todo">-7</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">D</td><td class="name">黄财坤</td><td class="num target">15</td><td class="num">4<small>（129+：2）</small><div class="bar"><i class="" style="width:33%"></i></div></td><td class="num pctv">26.7%</td><td class="ratio mark-ok" style="text-align:center"><b>50.0%</b><span class="sub">2 / 4 · 需20%</span></td><td class="num gap todo">-8</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">D</td><td class="name">江旭</td><td class="num target">15</td><td class="num">3<small>（129+：1）</small><div class="bar"><i class="" style="width:25%"></i></div></td><td class="num pctv">20.0%</td><td class="ratio mark-ok" style="text-align:center"><b>33.3%</b><span class="sub">1 / 3 · 需20%</span></td><td class="num gap todo">-9</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">D</td><td class="name">邓晓娜</td><td class="num target">15</td><td class="num">0<small>（129+：0）</small><div class="bar"><i class="" style="width:0%"></i></div></td><td class="num pctv">0.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 0 · 需20%</span></td><td class="num gap todo">-12</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">D</td><td class="name">黄靖淇</td><td class="num target">15</td><td class="num">0<small>（129+：0）</small><div class="bar"><i class="" style="width:0%"></i></div></td><td class="num pctv">0.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 0 · 需20%</span></td><td class="num gap todo">-12</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">D</td><td class="name">林旭佳</td><td class="num target">15</td><td class="num">0<small>（129+：0）</small><div class="bar"><i class="" style="width:0%"></i></div></td><td class="num pctv">0.0%</td><td class="ratio mark-red" style="text-align:center"><b>0.0%</b><span class="sub">0 / 0 · 需20%</span></td><td class="num gap todo">-12</td></tr></tbody></table></div></div>
+<div class="shops-wrap" id="shopView" style="display:none"><div class="sec-card"><div class="sec-head"><div class="sec-badge red-team">渠道一片</div><div><div class="sec-title">渠道一片</div><div class="sec-sub"><span>展示门店 <b>7</b> 家</span><span>有单门店 <b>5</b> 家</span><span>完成合计 <b>38</b> 单</span><span>129+ <b>14</b> 单</span><span>组内占比 <b>36.8%</b></span><span class="hid">另有 17 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="shopname">恒唯信百脑汇华为店</td><td class="ppl">谢燕华、李伯乐、莫杰熹</td><td class="num">17<small>（129+：8）</small></td><td class="num">47.1%</td></tr><tr class=""><td class="rank ctr">2</td><td class="shopname">幻想曲庆达小米店<small>揽装：曾维健</small></td><td class="ppl">郑晓南</td><td class="num">8<small>（129+：2）</small></td><td class="num">25.0%</td></tr><tr class=""><td class="rank ctr">3</td><td class="shopname">幻想曲百脑汇小米店<small>揽装：黄国浩</small></td><td class="ppl">张鹏</td><td class="num">6<small>（129+：2）</small></td><td class="num">33.3%</td></tr><tr class=""><td class="rank ctr">4</td><td class="shopname">铭泽众程华为店</td><td class="ppl">刘昱含</td><td class="num">5<small>（129+：2）</small></td><td class="num">40.0%</td></tr><tr class=""><td class="rank ctr">5</td><td class="shopname">珀新百脑汇VIVO</td><td class="ppl">张小桃</td><td class="num">2<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">酷烁君超苹果店</td><td class="ppl">戴哲伟</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">铭泽未来印华为店</td><td class="ppl">唐敏</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge red-team">天河城片区</div><div><div class="sec-title">天河城片区</div><div class="sec-sub"><span>展示门店 <b>3</b> 家</span><span>有单门店 <b>3</b> 家</span><span>完成合计 <b>55</b> 单</span><span>129+ <b>13</b> 单</span><span>组内占比 <b>23.6%</b></span><span class="hid">另有 13 家隐藏门店（含 4 单、129+ 1 单，已计入合计）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="shopname">恒唯信天河城华为店</td><td class="ppl">郑浩康、王静纯、郑君楠、杰兵</td><td class="num">32<small>（129+：10）</small></td><td class="num">31.3%</td></tr><tr class=""><td class="rank ctr">2</td><td class="shopname">炜图天汇华为店</td><td class="ppl">吴达彬、李诗桦</td><td class="num">14<small>（129+：2）</small></td><td class="num">14.3%</td></tr><tr class=""><td class="rank ctr">3</td><td class="shopname">炜图江燕路华为店</td><td class="ppl">陈伊伊</td><td class="num">5<small>（129+：0）</small></td><td class="num">0.0%</td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge red-team">新联片区</div><div><div class="sec-title">新联片区</div><div class="sec-sub"><span>展示门店 <b>11</b> 家</span><span>有单门店 <b>7</b> 家</span><span>完成合计 <b>54</b> 单</span><span>129+ <b>9</b> 单</span><span>组内占比 <b>16.7%</b></span><span class="hid">另有 9 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="shopname">新联百信广场苹果店<small>揽装：叶秋婷</small></td><td class="ppl">欧阳丹婷</td><td class="num">13<small>（129+：3）</small></td><td class="num">23.1%</td></tr><tr class=""><td class="rank ctr">2</td><td class="shopname">新联云门苹果店<small>揽装：李晓萍</small></td><td class="ppl">易凤玲</td><td class="num">10<small>（129+：1）</small></td><td class="num">10.0%</td></tr><tr class=""><td class="rank ctr">3</td><td class="shopname">新联天河城苹果店<small>揽装：曾庆辉</small></td><td class="ppl">张细妹、张坤明</td><td class="num">9<small>（129+：3）</small></td><td class="num">33.3%</td></tr><tr class=""><td class="rank ctr">4</td><td class="shopname">新联美林苹果店<small>揽装：李锡鹏</small></td><td class="ppl">罗志伟、江旭</td><td class="num">9<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">5</td><td class="shopname">新联增城万达苹果店<small>揽装：叶秋婷</small></td><td class="ppl">姚海亮</td><td class="num">7<small>（129+：2）</small></td><td class="num">28.6%</td></tr><tr class=""><td class="rank ctr">6</td><td class="shopname">新联番禺万达苹果店<small>揽装：李锡鹏</small></td><td class="ppl">李颖媚</td><td class="num">4<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">7</td><td class="shopname">新联龙归金铂苹果店<small>揽装：叶秋婷</small></td><td class="ppl">郑林胜</td><td class="num">2<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">新联白云万达苹果店<small>揽装：叶秋婷</small></td><td class="ppl">林旭佳</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">新联海珠万达苹果店<small>揽装：曾庆辉</small></td><td class="ppl">叶子衡</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">新联琶洲保利苹果店<small>揽装：曾庆辉</small></td><td class="ppl">盛涵瑞</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">新联太古汇苹果店<small>揽装：曾庆辉</small></td><td class="ppl">黄靖淇</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge blue-team">渠道二片</div><div><div class="sec-title">渠道二片</div><div class="sec-sub"><span>展示门店 <b>11</b> 家</span><span>有单门店 <b>8</b> 家</span><span>完成合计 <b>49</b> 单</span><span>129+ <b>15</b> 单</span><span>组内占比 <b>30.6%</b></span><span class="hid">另有 17 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="shopname">畅通东方宝泰华为店</td><td class="ppl">孙伟明、温锦标</td><td class="num">19<small>（129+：5）</small></td><td class="num">26.3%</td></tr><tr class=""><td class="rank ctr">2</td><td class="shopname">汇成龙洞OPPO店<small>揽装：张雄利</small></td><td class="ppl">蔡清华</td><td class="num">10<small>（129+：4）</small></td><td class="num">40.0%</td></tr><tr class=""><td class="rank ctr">3</td><td class="shopname">畅通智慧城苹果店</td><td class="ppl">朱晓丽</td><td class="num">6<small>（129+：4）</small></td><td class="num">66.7%</td></tr><tr class=""><td class="rank ctr">4</td><td class="shopname">幻想曲东方宝泰小米店</td><td class="ppl">谭雨丹</td><td class="num">5<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">5</td><td class="shopname">拓之亿海悦城华为店</td><td class="ppl">涂俊伟</td><td class="num">3<small>（129+：1）</small></td><td class="num">33.3%</td></tr><tr class=""><td class="rank ctr">6</td><td class="shopname">新联番禺天河城苹果店<small>揽装：李锡鹏</small></td><td class="ppl">冯梓淇</td><td class="num">3<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">7</td><td class="shopname">新联萝岗万达苹果店<small>揽装：叶秋婷</small></td><td class="ppl">林文娟</td><td class="num">2<small>（129+：1）</small></td><td class="num">50.0%</td></tr><tr class=""><td class="rank ctr">8</td><td class="shopname">新联东方宝泰苹果店<small>揽装：李锡鹏</small></td><td class="ppl">赵潇</td><td class="num">1<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">畅通信达金茂苹果店</td><td class="ppl">邓晓娜</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">锋行百脑汇华为店</td><td class="ppl">黄财坤、陈明烨</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="shopname">锋行天银华为店</td><td class="ppl">张京粤</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge blue-team">正佳片区</div><div><div class="sec-title">正佳片区</div><div class="sec-sub"><span>展示门店 <b>3</b> 家</span><span>有单门店 <b>3</b> 家</span><span>完成合计 <b>82</b> 单</span><span>129+ <b>25</b> 单</span><span>组内占比 <b>30.5%</b></span><span class="hid">另有 4 家隐藏门店（含 4 单、129+ 0 单，已计入合计）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="shopname">畅通正佳华为店</td><td class="ppl">李晓燕、陈鸿香、刘礼辉</td><td class="num">47<small>（129+：20）</small></td><td class="num">42.6%</td></tr><tr class=""><td class="rank ctr">2</td><td class="shopname">畅通正佳1楼华为</td><td class="ppl">刘霞、周闰平、秦智文</td><td class="num">21<small>（129+：5）</small></td><td class="num">23.8%</td></tr><tr class=""><td class="rank ctr">3</td><td class="shopname">畅通正佳苹果店</td><td class="ppl">陈媛</td><td class="num">10<small>（129+：0）</small></td><td class="num">0.0%</td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge tot">全部合计</div><div><div class="sec-sub"><span>展示门店 <b>35</b> 家（含隐藏共 95 家）</span><span>展示有单 <b>26</b> 家（含隐藏共 28 家）</span><span>完成合计 <b>278</b> 单</span><span>129+ <b>76</b> 单</span><span class="hid">隐藏门店 60 家，含 8 单（129+ 1 单）已计入合计</span></div></div></div></div></div>
+<div class="merch-title" id="merchTitle">大连锁各合作商发展情况</div>
+<div class="shops-wrap" id="merchView" style="display: none;"><div class="merch-title">大连锁各合作商发展情况</div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">畅通</div><div><div class="sec-title">畅通</div><div class="sec-sub"><span>展示门店 <b>7</b> 家</span><span>有单门店 <b>5</b> 家</span><span>完成合计 <b>103</b> 单</span><span>129+ <b>34</b> 单</span><span>组内占比 <b>33.0%</b></span><span class="hid">另有 4 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">畅通</td><td class="shopname">畅通正佳华为店</td><td class="ppl">李晓燕、陈鸿香、刘礼辉</td><td class="num">47<small>（129+：20）</small></td><td class="num">42.6%</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">畅通</td><td class="shopname">畅通正佳1楼华为</td><td class="ppl">刘霞、周闰平、秦智文</td><td class="num">21<small>（129+：5）</small></td><td class="num">23.8%</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">畅通</td><td class="shopname">畅通东方宝泰华为店</td><td class="ppl">孙伟明、温锦标</td><td class="num">19<small>（129+：5）</small></td><td class="num">26.3%</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">畅通</td><td class="shopname">畅通正佳苹果店</td><td class="ppl">陈媛</td><td class="num">10<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">畅通</td><td class="shopname">畅通智慧城苹果店</td><td class="ppl">朱晓丽</td><td class="num">6<small>（129+：4）</small></td><td class="num">66.7%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">畅通</td><td class="shopname">畅通太阳新天地华为店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">畅通</td><td class="shopname">畅通天河城华为店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">恒唯信</div><div><div class="sec-title">恒唯信</div><div class="sec-sub"><span>展示门店 <b>4</b> 家</span><span>有单门店 <b>3</b> 家</span><span>完成合计 <b>53</b> 单</span><span>129+ <b>19</b> 单</span><span>组内占比 <b>35.8%</b></span><span class="hid">另有 4 家隐藏门店（含 4 单、129+ 1 单，已计入合计）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">恒唯信</td><td class="shopname">恒唯信天河城华为店</td><td class="ppl">郑浩康、王静纯、郑君楠、杰兵</td><td class="num">32<small>（129+：10）</small></td><td class="num">31.3%</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">恒唯信</td><td class="shopname">恒唯信百脑汇华为店</td><td class="ppl">谢燕华、李伯乐、莫杰熹</td><td class="num">17<small>（129+：8）</small></td><td class="num">47.1%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">恒唯信</td><td class="shopname">恒唯信新天地华为店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">恒唯信</td><td class="shopname">恒唯信粤海天地华为店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">新联</div><div><div class="sec-title">新联</div><div class="sec-sub"><span>展示门店 <b>13</b> 家</span><span>有单门店 <b>10</b> 家</span><span>完成合计 <b>60</b> 单</span><span>129+ <b>10</b> 单</span><span>组内占比 <b>16.7%</b></span><span class="hid">另有 7 家隐藏门店（含 13 单、129+ 2 单，已计入合计）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">新联</td><td class="shopname">新联百信广场苹果店<small>揽装：叶秋婷</small></td><td class="ppl">欧阳丹婷</td><td class="num">13<small>（129+：3）</small></td><td class="num">23.1%</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">新联</td><td class="shopname">新联天河城苹果店<small>揽装：曾庆辉</small></td><td class="ppl">张细妹、张坤明</td><td class="num">9<small>（129+：3）</small></td><td class="num">33.3%</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">新联</td><td class="shopname">新联美林苹果店<small>揽装：李锡鹏</small></td><td class="ppl">罗志伟、江旭</td><td class="num">9<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">4</td><td class="ctr">新联</td><td class="shopname">新联增城万达苹果店<small>揽装：叶秋婷</small></td><td class="ppl">姚海亮</td><td class="num">7<small>（129+：2）</small></td><td class="num">28.6%</td></tr><tr class=""><td class="rank ctr">5</td><td class="ctr">新联</td><td class="shopname">新联番禺万达苹果店<small>揽装：李锡鹏</small></td><td class="ppl">李颖媚</td><td class="num">4<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">6</td><td class="ctr">新联</td><td class="shopname">新联番禺天河城苹果店<small>揽装：李锡鹏</small></td><td class="ppl">冯梓淇</td><td class="num">3<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class=""><td class="rank ctr">7</td><td class="ctr">新联</td><td class="shopname">新联龙归金铂苹果店<small>揽装：叶秋婷</small></td><td class="ppl">郑林胜</td><td class="num">2<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联海珠万达苹果店<small>揽装：曾庆辉</small></td><td class="ppl">叶子衡</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联嘉裕太阳城苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联金沙洲永旺苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联琶洲保利苹果店<small>揽装：曾庆辉</small></td><td class="ppl">盛涵瑞</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联雄峰城苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">新联</td><td class="shopname">新联悦汇城苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">汇成</div><div><div class="sec-title">汇成</div><div class="sec-sub"><span>展示门店 <b>4</b> 家</span><span>有单门店 <b>1</b> 家</span><span>完成合计 <b>10</b> 单</span><span>129+ <b>4</b> 单</span><span>组内占比 <b>40.0%</b></span><span class="hid">另有 2 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">汇成</td><td class="shopname">汇成龙洞OPPO店<small>揽装：张雄利</small></td><td class="ppl">蔡清华</td><td class="num">10<small>（129+：4）</small></td><td class="num">40.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">汇成</td><td class="shopname">汇成百脑汇OPPO店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">汇成</td><td class="shopname">汇成高志OPPO店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">汇成</td><td class="shopname">汇成智慧城OPPO店<small>揽装：李秀兰</small></td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">幻想曲</div><div><div class="sec-title">幻想曲</div><div class="sec-sub"><span>展示门店 <b>4</b> 家</span><span>有单门店 <b>3</b> 家</span><span>完成合计 <b>19</b> 单</span><span>129+ <b>4</b> 单</span><span>组内占比 <b>21.1%</b></span><span class="hid">另有 1 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">幻想曲</td><td class="shopname">幻想曲庆达小米店<small>揽装：曾维健</small></td><td class="ppl">郑晓南</td><td class="num">8<small>（129+：2）</small></td><td class="num">25.0%</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">幻想曲</td><td class="shopname">幻想曲百脑汇小米店<small>揽装：黄国浩</small></td><td class="ppl">张鹏</td><td class="num">6<small>（129+：2）</small></td><td class="num">33.3%</td></tr><tr class=""><td class="rank ctr">3</td><td class="ctr">幻想曲</td><td class="shopname">幻想曲东方宝泰小米店</td><td class="ppl">谭雨丹</td><td class="num">5<small>（129+：0）</small></td><td class="num">0.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">幻想曲</td><td class="shopname">幻想曲广垦小米店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">炜图</div><div><div class="sec-title">炜图</div><div class="sec-sub"><span>展示门店 <b>2</b> 家</span><span>有单门店 <b>2</b> 家</span><span>完成合计 <b>19</b> 单</span><span>129+ <b>2</b> 单</span><span>组内占比 <b>10.5%</b></span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">炜图</td><td class="shopname">炜图天汇华为店</td><td class="ppl">吴达彬、李诗桦</td><td class="num">14<small>（129+：2）</small></td><td class="num">14.3%</td></tr><tr class=""><td class="rank ctr">2</td><td class="ctr">炜图</td><td class="shopname">炜图江燕路华为店</td><td class="ppl">陈伊伊</td><td class="num">5<small>（129+：0）</small></td><td class="num">0.0%</td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">锋行</div><div><div class="sec-title">锋行</div><div class="sec-sub"><span>展示门店 <b>3</b> 家</span><span>有单门店 <b>0</b> 家</span><span>完成合计 <b>0</b> 单</span><span>129+ <b>0</b> 单</span><span>组内占比 <b>0.0%</b></span><span class="hid">另有 2 家隐藏门店（无单）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class="zero"><td class="rank ctr">—</td><td class="ctr">锋行</td><td class="shopname">锋行天河电脑城苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">锋行</td><td class="shopname">锋行天银华为店</td><td class="ppl">张京粤</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">锋行</td><td class="shopname">锋行众程苹果店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge merch">其余门店</div><div><div class="sec-title">其余门店（各小合作商）</div><div class="sec-sub"><span>展示门店 <b>6</b> 家</span><span>有单门店 <b>4</b> 家</span><span>完成合计 <b>14</b> 单</span><span>129+ <b>3</b> 单</span><span>组内占比 <b>21.4%</b></span><span class="hid">另有 26 家隐藏门店（含 9 单、129+ 1 单，已计入合计）</span></div></div></div><table><thead><tr><th class="ctr">排名</th><th>合作商</th><th>门店</th><th>对应人员</th><th class="num">完成情况</th><th class="num">129+ 占比</th></tr></thead><tbody><tr class=""><td class="rank ctr">1</td><td class="ctr">铭泽</td><td class="shopname">铭泽众程华为店</td><td class="ppl">刘昱含</td><td class="num">5<small>（129+：2）</small></td><td class="num">40.0%</td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">合丰</td><td class="shopname">合丰总统小米店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">铭泽</td><td class="shopname">铭泽未来印华为店</td><td class="ppl">唐敏</td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">珀新</td><td class="shopname">珀新领展VIVO店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">拓之亿</td><td class="shopname">拓之亿龙洞华为店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr><tr class="zero"><td class="rank ctr">—</td><td class="ctr">铭泽</td><td class="shopname">天河城小天才店</td><td class="ppl"><span class="nodata">无名单</span></td><td class="num"><span class="nodata">0</span></td><td class="num"><span class="nodata">—</span></td></tr></tbody></table></div><div class="sec-card"><div class="sec-head"><div class="sec-badge tot">全部合计</div><div><div class="sec-sub"><span>合作商 <b>8</b> 个块</span><span>展示门店 <b>43</b> 家（含隐藏共 89 家）</span><span>展示有单 <b>21</b> 家（含隐藏共 28 家）</span><span>完成合计 <b>278</b> 单</span><span>129+ <b>76</b> 单</span><span class="hid">隐藏门店 46 家，含 26 单（129+ 4 单）已计入合计</span></div></div></div></div></div>
+<script>function sView(v){var p=v==='people',s=v==='shop',m=v==='merch';document.getElementById('tabPeople').className='tab'+(p?' on':'');document.getElementById('tabShop').className='tab'+(s?' on':'');document.getElementById('tabMerch').className='tab'+(m?' on':'');document.getElementById('groups').style.display=p?'grid':'none';document.getElementById('shopView').style.display=s?'grid':'none';document.getElementById('merchView').style.display=m?'grid':'none';var mt=document.getElementById('merchTitle');if(mt)mt.style.display=m?'block':'none';document.getElementById('summary').style.display=(p?'grid':'none');document.getElementById('summaryShop').style.display=(s?'grid':'none');document.getElementById('summaryMerch').style.display=(m?'grid':'none');}sView('people');</script>
+<div class="foot">数据截至 2026年10月8日 · 本文件为分享快照（含人员+门店+商三个维度，可点顶部切换），每次更新后请在原网页重新生成并发送</div>
+</body>
+</html>
